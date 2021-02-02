@@ -1,4 +1,4 @@
-name: "PyVAST Python Egg"
+name: "TEST release assets"
 on:
   push:
     paths:
@@ -18,19 +18,10 @@ jobs:
       with:
         ref: ${{ github.ref }}
     
-    - name: Create Release
-      if: github.event.action == 'published'
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        tag_name: "$GITHUB_REF"
-        release_name: "$GITHUB_REF"
-        body: |
-          Test release delete-create assets
-        draft: false
-        prerelease: false
-
+    - name: Create asset
+      run: |
+        echo foobar > foobar
+    
     # This step ensures that assets from previous runs are cleaned up to avoid
     # failure of the next step (asset upload)
     - name: Delete existing Release Assets
@@ -38,10 +29,10 @@ jobs:
       uses: mknejp/delete-release-assets@v1
       with:
         token: ${{ github.token }}
-        tag: "$GITHUB_REF"
+        tag: ${{ github.ref }}
         fail-if-no-assets: false # don't fail if no previous assets exist
         fail-if-no-release: true # only delete assets when `tag` refers to a release
-        assets: "${{ matrix.args }}-linux-static.tar.gz"
+        assets: foobar
 
     - name: Publish to GitHub Release
       if: github.event_name == 'release' && github.event.action == 'published'
@@ -50,11 +41,11 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: "${{ env.BUILD_DIR }}/${{ steps.create_paths.outputs.artifact_name }}"
+        asset_path: ./foobar
         # The asset name is constant so we can permanently link to
         # https://github.com/tenzir/vast/releases/latest/download/vast-linux-static.tar.gz
         # for a build of the latest release.
-        asset_name: "${{ matrix.args }}-linux-static.tar.gz"
+        asset_name: foobar
         asset_content_type: application/gzip
     
     - name: Fail
